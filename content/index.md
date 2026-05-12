@@ -1,4 +1,4 @@
-# LESSON NAME
+# Software installation on HPC systems
 
 Intro
 
@@ -7,14 +7,8 @@ Intro
 - FIXME
 - ...
 - ...
-  :::
+:::
 
-```{csv-table}
-:delim: ;
-:widths: auto
-
-20 min ; {doc}`filename`
-```
 
 ```{toctree}
 :caption: The lesson
@@ -22,7 +16,7 @@ Intro
 
 episode.md
 ```
-
+<!--
 ```{toctree}
 :caption: Reference
 :maxdepth: 1
@@ -30,6 +24,7 @@ episode.md
 quick-reference
 guide
 ```
+-->
 
 ## Learning outcomes
 

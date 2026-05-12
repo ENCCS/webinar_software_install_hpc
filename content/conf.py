@@ -14,9 +14,9 @@
 # -- Project information -----------------------------------------------------
 
 # FIXME: choose title
-project = "Your lesson name"
+project = "Webinar:Software installation on HPC systems"
 # FIXME: insert correct author
-author = "The contributors"
+author = "Wei Li"
 copyright = f"2025, ENCCS, {author}"
 
 # FIXME: github organization / user that the repository belongs to
@@ -39,6 +39,7 @@ extensions = [
     "myst_nb",
     "sphinx.ext.todo",
     "sphinx.ext.intersphinx",
+    "sphinx_design",
 ]
 
 # FIXME: add bibtex files for references if any
