@@ -1548,3 +1548,289 @@ Spack activated with install: /leonardo/pub/userexternal/wli00000/spack-0.22.2-0
   ```
   :::
 
+## Apptainer/Singularity: container on HPC
+
+:::{caution}
+- different with docker 
+:::
+
+  ```
+  singularity pull ubuntu_22.04.sif docker://ubuntu:22.04
+  ```
+
+* check what default map/mount into the container 
+
+  ```
+  singularity shell ubuntu_22.04.sif
+  ```
+  then use `df -h`
+  also check your id and compare to host
+  :::{admonition} output
+  :class: dropdown
+  show case on Leonardo Booster
+
+  ```
+  Singularity> df -h
+  Filesystem                                           Size  Used Avail Use% Mounted on
+  overlay                                               64M   12K   64M   1% /
+  tmpfs                                                252G   33M  252G   1% /dev/shm
+  /dev/mapper/system_vg-usr_lv                         9.6G  5.0G  4.1G  55% /etc/localtime
+  /dev/mapper/system_vg-root_lv                        4.8G  221M  4.3G   5% /etc/hosts
+  10.128.80.1@o2ib:10.128.80.2@o2ib:/lhomefs/leonardo   50G   12G   39G  23% /leonardo/home/userexternal/wli00000
+  /dev/mapper/system_vg-tmp_lv                         9.6G  3.4G  5.7G  38% /tmp
+  /dev/mapper/system_vg-var_lv                          20G  5.3G   13G  29% /var/tmp
+  tmpfs                                                 64M   12K   64M   1% /etc/group
+  Singularity>id
+  uid=125629(wli00000) gid=25200(interactive) groups=25200(interactive),143814(EUHPC_D16_003),147314(EUHPC_D29_075)
+  ```
+  on host:
+
+  ```
+  Filesystem                                              Size  Used Avail Use% Mounted on
+  devtmpfs                                                252G     0  252G   0% /dev
+  tmpfs                                                   252G  2.3G  250G   1% /dev/shm
+  tmpfs                                                   252G  735M  251G   1% /run
+  tmpfs                                                   252G     0  252G   0% /sys/fs/cgroup
+  /dev/mapper/system_vg-root_lv                           4.8G  211M  4.3G   5% /
+  /dev/mapper/system_vg-usr_lv                            9.6G  5.0G  4.1G  55% /usr
+  /dev/sda2                                               974M  279M  629M  31% /boot
+  /dev/sda1                                               200M  5.9M  194M   3% /boot/efi
+  /dev/mapper/system_vg-opt_lv                            9.6G   83M  9.0G   1% /opt
+  /dev/mapper/system_vg-var_lv                             20G  5.3G   13G  30% /var
+  /dev/mapper/system_vg-tmp_lv                            9.6G  3.4G  5.7G  38% /tmp
+  /dev/mapper/extra_vg-scratch_local_lv                    14T  149G   14T   2% /scratch_local
+  10.128.80.1@o2ib:10.128.80.2@o2ib:/lhomefs/leonardo     470T  270T  196T  58% /leonardo
+  10.128.82.1@o2ib:10.128.82.2@o2ib:/larchive/meteo_arch   55P   19P   34P  36% /meteo_arch
+  10.128.84.1@o2ib:10.128.84.2@o2ib:/lscratch/leonardo     43P   28P   14P  68% /leonardo_scratch
+  10.128.82.1@o2ib:10.128.82.2@o2ib:/larchive/store        55P   19P   34P  36% /leonardo_store
+  10.128.82.1@o2ib:10.128.82.2@o2ib:/larchive/work         55P   19P   34P  36% /leonardo_work
+  ```
+  id $USER
+
+  ```
+  uid=125629(wli00000) gid=25200(interactive) groups=25200(interactive),143814(EUHPC_D16_003),147314(EUHPC_D29_075)
+  ```
+  :::
+
+- simple example with binary which is not work on the host OS of HPC
+
+  [aflow release ](https://github.com/aflow-org/aflow/releases)
+
+
+  * download and install
+
+    ```
+    wget https://github.com/aflow-org/aflow/releases/download/v4.1/aflow-4.1-ubuntu22-amd64.sh
+    mkdir aflow
+    bash ./aflow-4.1-ubuntu22-amd64.sh --help
+    bash ./aflow-4.1-ubuntu22-amd64.sh --prefix=$PWD/aflow --skip-license --exclude-subdir
+    ./aflow/bin/aflow --help
+    ```
+    error:
+    :::{admonition} output
+    :class: dropdown
+    show case on Leonardo Booster
+
+    ```
+    ./aflow/bin/aflow: /lib64/libm.so.6: version `GLIBC_2.29' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libm.so.6: version `GLIBC_2.35' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libc.so.6: version `GLIBC_2.30' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by ./aflow/bin/aflow)
+    ./aflow/bin/aflow: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.26' not found (required by ./aflow/bin/aflow)
+    ```
+    :::
+
+  * run it with ubuntu 22.04 image
+
+    ```
+    singularity exec ubuntu_22.04.sif aflow/bin/aflow --help
+    ```
+    :::{admonition} output
+    :class: dropdown
+    show case on Leonardo Booster
+
+    ```
+    ****************************************************************************************************
+    *                                                                                                  *
+    *                          aflow - Automatic-FLOW for materials discovery                          *
+    *                aflow.org consortium - High-Throughput ab-initio Computing Project                *
+    *               version 4.1.0 - g++/gcc 11.4.0 - built [2026-04-27] - (C) 2003-2026                *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *    AFLOW is free software: you can redistribute it and/or modify it under the terms of the       *
+    *    GNU General Public License as published by the Free Software Foundation, either version 3     *
+    *    of the License, or (at your option) any later version.                                        *
+    *                                                                                                  *
+    *    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;     *
+    *    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.     *
+    *    See the GNU General Public License for more details.                                          *
+    *                                                                                                  *
+    *    You should have received a copy of the GNU General Public License along with this program.    *
+    *    If not, see <http://www.gnu.org/licenses/>.                                                   *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *     Use of AFLOW software and repositories welcomes references to the following publications:    *
+    *                                                                                                  *
+    *  Divilov et al.   High Entropy Alloys & Mater. 3, 178 (2025) 10.1007/s44210-025-00058-2 (AFLOW4) *
+    *  Eckert et al.    npj Comput. Mater. 11, 40 (2025)   10.1038/s41524-025-01529-1      (Soliquidy) *
+    *  Eckert et al.    Comp. Mat. Sci. 240, 112988 (2024) 10.1016/j.commatsci.2024.112988 (proto4)    *
+    *  Divilov et al.   Acta Mater. 266, 119667 (2024)     10.1016/j.actamat.2024.119667   (spinodal)  *
+    *  Divilov et al.   Nature 625, 66-73 (2024)           10.1038/s41586-023-06786-y      (DEED)      *
+    *  Friedrich et al. J. Chem. Phys. 160, 042501 (2024)  10.1063/5.0184917               (CCE2)      *
+    *  Esters et al.    Comp. Mat. Sci. 216, 111808 (2023) 10.1016/j.commatsci.2022.111808 (AFLOW.org) *
+    *  Oses et al.      Comp. Mat. Sci. 217, 111889 (2023) 10.1016/j.commatsci.2022.111889 (aflow++)   *
+    *  Friedrich et al. npj Comput. Mater. 5, 59 (2019)  10.1038/s41524-019-0192-1       (CCE)         *
+    *  Hicks et al.     Comp. Mat. Sci. 161, S1 (2019)   10.1016/j.commatsci.2018.10.043 (ANRL proto2) *
+    *  Oses et al.      J. Chem. Inf. Model. (2018)      10.1021/acs.jcim.8b00393        (AFLOW-CHULL) *
+    *  Gossett et al.   Comp. Mat. Sci. 152, 134 (2018)  10.1016/j.commatsci.2018.03.075 (AFLOW-ML)    *
+    *  Hicks et al.     Acta Cryst. A74, 184-203 (2018)  10.1107/S2053273318003066       (AFLOW-SYM)   *
+    *  MBNardelli et al Comp. Mat. Sci. 143, 462 (2018)  10.1016/j.commatsci.2017.11.034 (PAOFLOW)     *
+    *  Rose et al.      Comp. Mat. Sci. 137, 362 (2017)  10.1016/j.commatsci.2017.04.036 (AFLUX lang)  *
+    *  Supka et al.     Comp. Mat. Sci. 136, 76 (2017)   10.1016/j.commatsci.2017.03.055 (AFLOWpi)     *
+    *  Plata et al.     npj Comput. Mater. 3, 45 (2017)  10.1038/s41524-017-0046-7       (AAPL kappa)  *
+    *  Toher et al.     Phys. Rev.Mater.1, 015401 (2017) 10.1103/PhysRevMaterials.1.015401 (AEL elast) *
+    *  Mehl et al.      Comp. Mat. Sci. 136, S1 (2017)   10.1016/j.commatsci.2017.01.017 (ANRL proto1) *
+    *  Calderon et al.  Comp. Mat. Sci. 108A, 233 (2015) 10.1016/j.commatsci.2015.07.019 (standard)    *
+    *  Toher et al.     Phys. Rev. B 90, 174107 (2014)   10.1103/PhysRevB.90.174107      (AGL Gibbs)   *
+    *  Taylor et al.    Comp. Mat. Sci. 93, 178 (2014)   10.1016/j.commatsci.2014.05.014 (REST-API)    *
+    *  Curtarolo et al. Comp. Mat. Sci. 58, 227 (2012)   10.1016/j.commatsci.2012.02.002 (AFLOW.org)   *
+    *  Curtarolo et al. Comp. Mat. Sci. 58, 218 (2012)   10.1016/j.commatsci.2012.02.005 (AFLOW C++)   *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *                                  aflow/aflow.org - CONTRIBUTORS                                  *
+    *  2000-2019 Stefano Curtarolo (aflow); 2002-2004 Dane Morgan (convasp); 2007-2011 Wahyu Setyawan  *
+    *  (--rsm --edos --kband --icsd*); 2008-2011 Roman Chepulskyy (--edos --kband  surfaces);          *
+    *  2008 Gus Hart (lattice reductions - prototypes); 2009-2011, Ohad Levy (prototypes);             *
+    *  2009-2010, Michal Jahnatek (APL); 2010-2013 Shidong Wang (cluster expansion); 2010-2013         *
+    *  Richard Taylor (surfaces, apennsy); 2010-2013 Junkai Xue (prototyper); 2010-2013 Kesong Yang    *
+    *  (findsym, frozsl, plotband/dos); 2013-2019 Cormac Toher (AGL Debye-Gruneisen, AEL elastic);     *
+    *  2013-2019 Frisco Rose (API, Aflux); 2013-2018 Pinku Nath (Quasi-harmonic approximation);        *
+    *  2013-2017 Jose J. Plata (AAPL, thermal cond.); 2014-2019 David Hicks (symmetry, structure       *
+    *  comparison, prototypes); 2014-2019 Corey Oses (Egap, bader, chull, APL, pocc); 2018-2019 Marco  *
+    *  Esters (AAPL, thermal cond.); 2016-2019 Denise Ford (GFA); 2018-2019 Rico Friedrich (CCE);      *
+    *  2021-2023 Simon Divilov (QCA, fitting); 2021-2023 Hagen Eckert (GFA, entry loader, JSON);       *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *               version 4.1.0 - g++/gcc 11.4.0 - built [2026-04-27] - (C) 2003-2026                *
+    ****************************************************************************************************
+
+    ******* BEGIN HELP MODE ****************************************************************************
+     AFLOW HELP AVAILABLE HELPS
+      aflow --license
+              License information.
+      aflow --help
+              This help.
+      aflow --readme
+              The list of all the commands available.
+      aflow --readme=xaflow
+              Returns the HELP information for the installation of aflow.
+      aflow --readme=aflow|--readme=run|--readme_aflow
+              Returns the HELP information for the "running machinery".
+      aflow --readme=aflowrc
+              Returns the HELP information for the installation of aflow.
+      aflow --readme=pflow|--readme=processor|--readme=aconvasp|--readme_aconvasp
+              Returns the HELP information for the "processing machinery".
+      aflow --readme=scripting|--readme_scripting
+              Returns the HELP information for the "scripting" operations.
+      aflow --readme=apl|--readme_apl
+              Returns the HELP information for the "aflow-harmonic-phonon-library".
+      aflow --readme=qha|--readme_qha|--readme=qha3p|--readme_qha3p|--readme=scqha|--readme_scqha
+              Returns the HELP information for the "aflow-quasi-harmonic-library".
+      aflow --readme=aapl|--readme_aapl
+              Returns the HELP information for the "aflow-anharmonic-phonon-library (AFLOW-AAPL)".
+      aflow --readme=agl|--readme_agl
+              Returns the HELP information for the "aflow-gibbs-library (AFLOW-AGL)".
+      aflow --readme=ael|--readme_ael
+              Returns the HELP information for the "aflow-elastic-library (AFLOW-AEL)".
+      aflow --readme=prototypes|--readme_prototypes|--readme=anrl|--readme_anrl
+              Returns the HELP information for the "aflow library of prototypes".
+      aflow --readme=xtalfinder|--readme_xtalfinder|--readme=compare|--readme_compare
+              Returns the HELP information for the "aflow-crystal-finder (AFLOW-XtalFinder) code".
+      aflow --readme=gfa|--readme_gfa
+              Returns the HELP information for the "glass-forming-ability code".
+      aflow --readme=symmetry|--readme_symmetry
+              Returns the HELP information for the "symmetry library (AFLOW-SYM)".
+      aflow --readme=nhull|--readme_nhull
+              Returns the HELP information for the "convex hull library (AFLOW-hull)".
+      aflow --readme=errors|--readme=exceptions|--readme_errors|--readme_exceptions
+              Returns the HELP information for exception handling in AFLOW.
+      aflow --readme=partial_occupation|--readme=pocc|--readme_pocc
+              Returns the HELP information for the "partial occupation library".
+      aflow --readme=frozsl|--readme_frozsl
+              Returns the HELP information for the "frozsl" add ons.
+    ******* END HELP MODE ******************************************************************************
+
+    ****************************************************************************************************
+    *                                                                                                  *
+    *                          aflow - Automatic-FLOW for materials discovery                          *
+    *                aflow.org consortium - High-Throughput ab-initio Computing Project                *
+    *               version 4.1.0 - g++/gcc 11.4.0 - built [2026-04-27] - (C) 2003-2026                *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *    AFLOW is free software: you can redistribute it and/or modify it under the terms of the       *
+    *    GNU General Public License as published by the Free Software Foundation, either version 3     *
+    *    of the License, or (at your option) any later version.                                        *
+    *                                                                                                  *
+    *    This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;     *
+    *    without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.     *
+    *    See the GNU General Public License for more details.                                          *
+    *                                                                                                  *
+    *    You should have received a copy of the GNU General Public License along with this program.    *
+    *    If not, see <http://www.gnu.org/licenses/>.                                                   *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *     Use of AFLOW software and repositories welcomes references to the following publications:    *
+    *                                                                                                  *
+    *  Divilov et al.   High Entropy Alloys & Mater. 3, 178 (2025) 10.1007/s44210-025-00058-2 (AFLOW4) *
+    *  Eckert et al.    npj Comput. Mater. 11, 40 (2025)   10.1038/s41524-025-01529-1      (Soliquidy) *
+    *  Eckert et al.    Comp. Mat. Sci. 240, 112988 (2024) 10.1016/j.commatsci.2024.112988 (proto4)    *
+    *  Divilov et al.   Acta Mater. 266, 119667 (2024)     10.1016/j.actamat.2024.119667   (spinodal)  *
+    *  Divilov et al.   Nature 625, 66-73 (2024)           10.1038/s41586-023-06786-y      (DEED)      *
+    *  Friedrich et al. J. Chem. Phys. 160, 042501 (2024)  10.1063/5.0184917               (CCE2)      *
+    *  Esters et al.    Comp. Mat. Sci. 216, 111808 (2023) 10.1016/j.commatsci.2022.111808 (AFLOW.org) *
+    *  Oses et al.      Comp. Mat. Sci. 217, 111889 (2023) 10.1016/j.commatsci.2022.111889 (aflow++)   *
+    *  Friedrich et al. npj Comput. Mater. 5, 59 (2019)  10.1038/s41524-019-0192-1       (CCE)         *
+    *  Hicks et al.     Comp. Mat. Sci. 161, S1 (2019)   10.1016/j.commatsci.2018.10.043 (ANRL proto2) *
+    *  Oses et al.      J. Chem. Inf. Model. (2018)      10.1021/acs.jcim.8b00393        (AFLOW-CHULL) *
+    *  Gossett et al.   Comp. Mat. Sci. 152, 134 (2018)  10.1016/j.commatsci.2018.03.075 (AFLOW-ML)    *
+    *  Hicks et al.     Acta Cryst. A74, 184-203 (2018)  10.1107/S2053273318003066       (AFLOW-SYM)   *
+    *  MBNardelli et al Comp. Mat. Sci. 143, 462 (2018)  10.1016/j.commatsci.2017.11.034 (PAOFLOW)     *
+    *  Rose et al.      Comp. Mat. Sci. 137, 362 (2017)  10.1016/j.commatsci.2017.04.036 (AFLUX lang)  *
+    *  Supka et al.     Comp. Mat. Sci. 136, 76 (2017)   10.1016/j.commatsci.2017.03.055 (AFLOWpi)     *
+    *  Plata et al.     npj Comput. Mater. 3, 45 (2017)  10.1038/s41524-017-0046-7       (AAPL kappa)  *
+    *  Toher et al.     Phys. Rev.Mater.1, 015401 (2017) 10.1103/PhysRevMaterials.1.015401 (AEL elast) *
+    *  Mehl et al.      Comp. Mat. Sci. 136, S1 (2017)   10.1016/j.commatsci.2017.01.017 (ANRL proto1) *
+    *  Calderon et al.  Comp. Mat. Sci. 108A, 233 (2015) 10.1016/j.commatsci.2015.07.019 (standard)    *
+    *  Toher et al.     Phys. Rev. B 90, 174107 (2014)   10.1103/PhysRevB.90.174107      (AGL Gibbs)   *
+    *  Taylor et al.    Comp. Mat. Sci. 93, 178 (2014)   10.1016/j.commatsci.2014.05.014 (REST-API)    *
+    *  Curtarolo et al. Comp. Mat. Sci. 58, 227 (2012)   10.1016/j.commatsci.2012.02.002 (AFLOW.org)   *
+    *  Curtarolo et al. Comp. Mat. Sci. 58, 218 (2012)   10.1016/j.commatsci.2012.02.005 (AFLOW C++)   *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *                                                                                                  *
+    *                                  aflow/aflow.org - CONTRIBUTORS                                  *
+    *  2000-2019 Stefano Curtarolo (aflow); 2002-2004 Dane Morgan (convasp); 2007-2011 Wahyu Setyawan  *
+    *  (--rsm --edos --kband --icsd*); 2008-2011 Roman Chepulskyy (--edos --kband  surfaces);          *
+    *  2008 Gus Hart (lattice reductions - prototypes); 2009-2011, Ohad Levy (prototypes);             *
+    *  2009-2010, Michal Jahnatek (APL); 2010-2013 Shidong Wang (cluster expansion); 2010-2013         *
+    *  Richard Taylor (surfaces, apennsy); 2010-2013 Junkai Xue (prototyper); 2010-2013 Kesong Yang    *
+    *  (findsym, frozsl, plotband/dos); 2013-2019 Cormac Toher (AGL Debye-Gruneisen, AEL elastic);     *
+    *  2013-2019 Frisco Rose (API, Aflux); 2013-2018 Pinku Nath (Quasi-harmonic approximation);        *
+    *  2013-2017 Jose J. Plata (AAPL, thermal cond.); 2014-2019 David Hicks (symmetry, structure       *
+    *  comparison, prototypes); 2014-2019 Corey Oses (Egap, bader, chull, APL, pocc); 2018-2019 Marco  *
+    *  Esters (AAPL, thermal cond.); 2016-2019 Denise Ford (GFA); 2018-2019 Rico Friedrich (CCE);      *
+    *  2021-2023 Simon Divilov (QCA, fitting); 2021-2023 Hagen Eckert (GFA, entry loader, JSON);       *
+    *                                                                                                  *
+    ****************************************************************************************************
+    *               version 4.1.0 - g++/gcc 11.4.0 - built [2026-04-27] - (C) 2003-2026                *
+    ****************************************************************************************************
+    ```
+    :::
