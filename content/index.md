@@ -12,7 +12,7 @@ Intro
 
 ```{toctree}
 :caption: The lesson
-:maxdepth: 1
+:maxdepth: 2
 
 episode.md
 ```
